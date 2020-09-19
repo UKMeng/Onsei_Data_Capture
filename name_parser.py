@@ -15,7 +15,7 @@ def name_parser(filepath):
         # print(name, s_num, ep_num)
         return name, s_num, ep_num
     except Exception as e:
-        print(str(e))
+        print('[-]' + str(e))
         return
 
 if __name__ == "__main__":
