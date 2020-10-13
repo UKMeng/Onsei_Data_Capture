@@ -5,10 +5,7 @@ from pyquery import PyQuery as pq
 from lxml import etree
 from bs4 import BeautifulSoup
 
-# config
-chii_sid = {} #用来访问特殊页面的cookie
-
-def get_html(url):
+def get_html(url, chii_sid):
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3100.0 Safari/537.36"}
     cookies = dict(chii_sid=chii_sid)
     result = requests.get(str(url), headers=headers, cookies=cookies)
@@ -112,8 +109,11 @@ def get_pic(doc):
     pic = 'https:' + str(a.attr.href)
     return pic
 
-def main(sub_id, ep_num):
-    sub_htmlcode = get_html('https://bgm.tv/subject/' + str(sub_id))        
+def main(sub_id, ep_num, cookie):
+    # config
+    chii_sid = cookie #用来访问特殊页面的cookie
+
+    sub_htmlcode = get_html('https://bgm.tv/subject/' + str(sub_id), chii_sid)        
     sub_doc = pq(sub_htmlcode)
     #sub_soup = BeautifulSoup(sub_htmlcode, 'lxml') 
     sub_title = get_title(sub_doc)
@@ -122,7 +122,7 @@ def main(sub_id, ep_num):
         return
     #print(sub_title)
     ep_id = get_epid(sub_doc, ep_num)
-    ep_htmlcode = get_html('https://bgm.tv' + ep_id)
+    ep_htmlcode = get_html('https://bgm.tv' + ep_id, chii_sid)
     ep_doc = pq(ep_htmlcode)
     sub_dic = {
         'title': sub_title,
@@ -153,4 +153,4 @@ def main(sub_id, ep_num):
     return sub_data, ep_data
 
 if __name__ == '__main__':
-    main(294669, 1)
+    print("test")

@@ -11,8 +11,8 @@ from PIL import Image, ImageFilter
 success_folder = './output/'
 
 
-def get_data_from_json(sub_id, s_num, ep_num):
-    data1, data2 = bangumi.main(sub_id, ep_num)
+def get_data_from_json(sub_id, s_num, ep_num, cookie):
+    data1, data2 = bangumi.main(sub_id, ep_num, cookie)
     sub_data = json.loads(data1)
     ep_data = json.loads(data2)
     ep_data['episode'] = ep_num
@@ -46,6 +46,24 @@ def cut_image(path, file_name, f1, f2):
     except:
         print('[-]Cover cut failed!')
 
+def check_subtitle(file_path, file_name, season_folder_path):
+    file_type = ['.srt', '.ass', '.SRT', '.ASS']
+    base_name = os.path.splitext(os.path.basename(file_path))[0]
+    root = os.path.dirname(file_path)
+    dirs = os.listdir(root)
+    for entry in dirs:
+        ff = os.path.join(root, entry)
+        f = os.path.basename(ff)
+        if os.path.splitext(f)[1] in file_type and os.path.splitext(f)[0] == base_name:
+            sub_name = f
+            suffix = os.path.splitext(f)[1]
+            print("[+]找到字幕" + sub_name)
+            new_name = file_name + suffix
+            shutil.move('./'+sub_name, season_folder_path+new_name)
+            print("[+]字幕已转移")
+            break
+
+    
 def image_process(file_path, anime_folder_path, season_folder_path, s_num, ep_num):
     v_name = os.path.basename(file_path)
     image_name = re.sub('\..*$', '.jpg', v_name)
@@ -55,6 +73,7 @@ def image_process(file_path, anime_folder_path, season_folder_path, s_num, ep_nu
     shutil.copyfile('./' + image_name, anime_folder_path+fanart_name)
     shutil.move('./'+image_name, season_folder_path+thumb_name)
     cut_image(anime_folder_path, fanart_name, fanart_name, 'poster.jpg')
+    check_subtitle(file_path, file_name, season_folder_path)#检查是否有字幕
 
 def print_files(anime_folder_path, season_folder_path, sub_data, ep_data):
     # tvshow.nfo
@@ -148,10 +167,10 @@ def print_files(anime_folder_path, season_folder_path, sub_data, ep_data):
         # moveFailedFolder(filepath, failed_folder)
         return
 
-def core_main(file_path, name, s_num, ep_num):
+def core_main(file_path, name, s_num, ep_num, cookie):
     if name.isdigit(): anime_id = int(name) 
     else: anime_id = get_id(name)
-    sub_data, ep_data = get_data_from_json(anime_id, s_num, ep_num,)             # 数据获取部分完成，接下去是文件操作部分，如创建文件夹，识别同一文件名的图片作为thumb，用ai识别接口剪辑图片成封面，重命名文件，移动文件，创建nfo文件并写入信息
+    sub_data, ep_data = get_data_from_json(anime_id, s_num, ep_num, cookie)             # 数据获取部分完成，接下去是文件操作部分，如创建文件夹，识别同一文件名的图片作为thumb，用ai识别接口剪辑图片成封面，重命名文件，移动文件，创建nfo文件并写入信息
     anime_folder_path, season_folder_path = create_folder(success_folder, sub_data, s_num)
     image_process(file_path, anime_folder_path, season_folder_path, s_num, ep_num)
     print_files(anime_folder_path, season_folder_path, sub_data, ep_data)
@@ -161,4 +180,4 @@ def core_main(file_path, name, s_num, ep_num):
     shutil.move(file_path, season_folder_path + file_name)
 
 if __name__ == '__main__':
-    get_data_from_json(294669, 1, 1)
+    check_subtitle('')

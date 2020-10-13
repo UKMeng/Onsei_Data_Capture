@@ -2,8 +2,6 @@ import os
 from core import *
 from name_parser import name_parser
 
-root_path = {}
-
 def anime_lists(root, escape_folder):
     for folder in escape_folder:
         if folder in root:
@@ -19,12 +17,11 @@ def anime_lists(root, escape_folder):
             total.append(f)
     return total
 
-def create_data_and_move(file_path: str):
+def create_data_and_move(file_path, cookie):
     file_name, season_num, episode_num = name_parser(file_path)       # 这里的filename最好是打算直接读取出sub_id而不是动画名称，动画名称在搜索中取得的id可能不准确
-
     try:
         print("[!]Making Data for [{}]".format(os.path.basename(file_path)))
-        core_main(file_path, file_name, season_num, episode_num)
+        core_main(file_path, file_name, season_num, episode_num, cookie)
         print("[*]======================================================")
     except Exception as err:
         print("[-] [{}] ERROR:".format(file_path))
@@ -32,8 +29,10 @@ def create_data_and_move(file_path: str):
 
 
 if __name__ == "__main__":
+    root_path = input("请输入目标文件夹：")
+    cookie = input("请输入bgm的cookie（chii_sid）：")
     os.chdir(root_path)
-    anime_list = anime_lists('.', [])
+    anime_list = anime_lists('.', ['output'])
 
     count = 0
     count_all = str(len(anime_list))
@@ -42,4 +41,4 @@ if __name__ == "__main__":
         count = count + 1
         percentage = str(count / int(count_all) * 100)[:4] + '%'
         print('[!] - ' + percentage + ' [' + str(count) + '/' + count_all + '] -')
-        create_data_and_move(anime_path)
+        create_data_and_move(anime_path, cookie)
