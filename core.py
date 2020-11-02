@@ -65,14 +65,25 @@ def check_subtitle(file_path, file_name, season_folder_path):
 
     
 def image_process(file_path, anime_folder_path, season_folder_path, s_num, ep_num):
-    v_name = os.path.basename(file_path)
-    image_name = re.sub('\..*$', '.jpg', v_name)
     file_name = 'S' + str(s_num) + 'E' + str(ep_num)
-    thumb_name = file_name + '-thumb.jpg'
-    fanart_name = 'fanart.jpg'
-    shutil.copyfile('./' + image_name, anime_folder_path+fanart_name)
-    shutil.move('./'+image_name, season_folder_path+thumb_name)
-    cut_image(anime_folder_path, fanart_name, fanart_name, 'poster.jpg')
+    file_type = ['.png', '.jpg', '.jpeg', '.PNG', '.JPG', '.JPEG', '.gif', 'GIF', '.bmp', '.BMP', '.webp', '.WEBP']
+    base_name = os.path.splitext(os.path.basename(file_path))[0]
+    root = os.path.dirname(file_path)
+    dirs = os.listdir(root)
+    for entry in dirs:
+        ff = os.path.join(root, entry)
+        f = os.path.basename(ff)
+        if os.path.splitext(f)[1] in file_type and os.path.splitext(f)[0] == base_name:
+            pic_name = f
+            suffix = os.path.splitext(f)[1]
+            print("[+]找到封面" + pic_name)
+            thumb_name = file_name + '-thumb' + suffix
+            fanart_name = 'fanart' + suffix
+            shutil.copyfile('./' + pic_name, anime_folder_path+fanart_name)
+            shutil.move('./'+pic_name, season_folder_path+thumb_name)
+            cut_image(anime_folder_path, fanart_name, fanart_name, 'poster'+suffix)
+            print("[+]封面已转移已转移")
+            break
     check_subtitle(file_path, file_name, season_folder_path)#检查是否有字幕
 
 def print_files(anime_folder_path, season_folder_path, sub_data, ep_data):
