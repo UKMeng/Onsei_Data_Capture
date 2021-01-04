@@ -21,14 +21,14 @@ def create_data_and_move(file_path, cookie):
     file_name, season_num, episode_num = name_parser(file_path)       # 这里的filename最好是打算直接读取出sub_id而不是动画名称，动画名称在搜索中取得的id可能不准确
     try:
         print("[!]Making Data for [{}]".format(os.path.basename(file_path)))
-        core_main(file_path, file_name, season_num, episode_num, cookie)
+        core_anime(file_path, file_name, season_num, episode_num, cookie)
         print("[*]======================================================")
     except Exception as err:
         print("[-] [{}] ERROR:".format(file_path))
         print('[-]', err)
 
 
-if __name__ == "__main__":
+def main():
     root_path = input("请输入目标文件夹：")
     cookie = input("请输入bgm的cookie（chii_sid）：")
     os.chdir(root_path)
@@ -42,3 +42,6 @@ if __name__ == "__main__":
         percentage = str(count / int(count_all) * 100)[:4] + '%'
         print('[!] - ' + percentage + ' [' + str(count) + '/' + count_all + '] -')
         create_data_and_move(anime_path, cookie)
+
+if __name__ == '__main__':
+    main()
