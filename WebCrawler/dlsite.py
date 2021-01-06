@@ -31,7 +31,8 @@ def getActor(a):  # //*[@id="center_column"]/div[2]/div[1]/div/table/tbody/tr[1]
     try:
         result1 = html.xpath('//th[contains(text(),"声優")]/../td/a/text()')
     except:
-        result1 = 'unknown'
+        result1 = ['unknown']
+    if result1 == []: result1 = ['unknown']
     return result1
 def getActorPhoto(actor): #//*[@id="star_qdt"]/li/a/img
     a = actor.split(',')

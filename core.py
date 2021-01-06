@@ -300,6 +300,7 @@ def tags(album_folder_path, voice_data):
         a = eyed3.load(os.path.join(album_folder_path, entry))
         if(a == None): continue
         else:
+            a.tag.version = (2,3,0)  # 更改ID3版本，2.2仅只读
             a.tag.artist = actor_name
             a.tag.album_artist = actor_name
             a.tag.album = album_title
