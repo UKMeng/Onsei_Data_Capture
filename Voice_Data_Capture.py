@@ -1,5 +1,6 @@
 import os
 import re
+import shutil
 from core import core_voice
 from name_parser import name_parser
 
@@ -31,6 +32,7 @@ def create_data_and_move(file_path):
 
 def main():
     root_path = input("请输入目标文件夹：")
+    shutil.copy("./extra/补充封面.mp3", root_path)
     os.chdir(root_path)
     voice_list = voice_lists('.', ['output'])  # 按照文件夹识别
     count = 0
@@ -41,6 +43,7 @@ def main():
         percentage = str(count / int(count_all) * 100)[:4] + '%'   
         print('[!] - ' + percentage + ' [' + str(count) + '/' + count_all + '] -')    # 进度条
         create_data_and_move(voice_path)
+    os.remove("./补充封面.mp3")
 
 if __name__ == '__main__':
     main()

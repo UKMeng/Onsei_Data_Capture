@@ -298,7 +298,7 @@ def tags(album_folder_path, voice_data):
     dirs = os.listdir(album_folder_path)
     for entry in dirs:
         a = eyed3.load(os.path.join(album_folder_path, entry))
-        if(a == None): continue
+        if(a == None or a.tag == None): continue
         else:
             a.tag.version = (2,3,0)  # 更改ID3版本，2.2仅只读
             a.tag.artist = actor_name
@@ -312,6 +312,7 @@ def core_voice(file_path, dlid):
     voice_data = get_voice_data_from_json(dlid)
     album_folder_path = create_voice_folder(success_folder, voice_data, dlid)  # 创建文件夹
     move_voice(file_path, album_folder_path)   # 转移文件
+    shutil.copy("./补充封面.mp3", album_folder_path)     # 补充封面文件
     tags(album_folder_path, voice_data)        # 更改标签，wav文件需要另外添加一个mp3文件
     print_voice_files(album_folder_path, voice_data)
     

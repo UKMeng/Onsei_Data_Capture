@@ -136,7 +136,7 @@ def main(number):
         htmlcode = get_html('https://www.dlsite.com/pro/work/=/product_id/' + number + '.html')
         dic = {
             'actor': getActor(htmlcode),
-            'title': getTitle(htmlcode),
+            'title': number + " " + getTitle(htmlcode),
             'studio': getStudio(htmlcode),
             'outline': '',
             'runtime': '',
