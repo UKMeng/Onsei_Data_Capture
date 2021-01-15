@@ -40,18 +40,27 @@ def create_anime_folder(success_folder, sub_data, s_num):
         os.makedirs(season_folder_path)
     return anime_folder_path, season_folder_path
 
-def create_voice_folder(success_folder, voice_data, dlid):
+def create_voice_folder(success_folder, voice_data, dlid, mode=0):
     actors = voice_data['actor']
-    title = voice_data['title']
-    actor_name = ''
-    for actor in actors:
-        if actor_name != '':
-            actor_name = actor_name + ';' + actor
-        else: actor_name = actor
-    actor_folder_path = success_folder + actor_name + '/'
-    album_folder_path = actor_folder_path + dlid + '/'
-    if not os.path.exists(actor_folder_path):
-        os.makedirs(actor_folder_path)
+    series = voice_data['series']
+    circle = voice_data['studio']
+    if(mode == 0):
+        actor_name = ''
+        for actor in actors:
+            if actor_name != '':
+                actor_name = actor_name + ';' + actor
+            else: actor_name = actor
+        actor_folder_path = success_folder + actor_name + '/'
+        album_folder_path = actor_folder_path + dlid + '/'
+        if not os.path.exists(actor_folder_path):
+            os.makedirs(actor_folder_path)
+    elif(mode == 1):
+        circle_folder_path = success_folder + circle + '/'
+        if(series != ''):
+            album_folder_path = circle_folder_path + series + '/'
+        else: album_folder_path = circle_folder_path
+        if not os.path.exists(circle_folder_path):
+            os.makedirs(circle_folder_path)
     if not os.path.exists(album_folder_path):
         os.makedirs(album_folder_path)
     return album_folder_path
