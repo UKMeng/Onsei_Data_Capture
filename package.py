@@ -31,7 +31,9 @@ def create_data_and_move(file_path):
         print("[!]Making Data for [{}]".format(os.path.basename(file_path)))
         voice_data = core.get_voice_data_from_json(dlid)
         album_folder_path = core.create_voice_folder(success_folder, voice_data, dlid, 1)
-        shutil.move(file_path, album_folder_path)
+        dename = re.sub('.(rar|RAR|7z|7Z|zip|ZIP)$', '', file_path) # 获取去掉后缀的文件名
+        os.rename(file_path, dename) # 重命名
+        shutil.move(dename, album_folder_path) # 移动压缩包到指定的文件夹        
         print("[*]======================================================")
     except Exception as err:
         print("[-] [{}] ERROR:".format(file_path))
