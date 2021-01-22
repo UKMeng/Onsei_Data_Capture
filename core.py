@@ -44,6 +44,7 @@ def create_voice_folder(success_folder, voice_data, dlid, mode=0):
     actors = voice_data['actor']
     series = voice_data['series']
     circle = voice_data['studio']
+    circle = re.sub(':', '', circle) # 去除不合法文件夹命名规则
     if(mode == 0):
         actor_name = ''
         for actor in actors:
@@ -327,4 +328,4 @@ def core_voice(file_path, dlid):
     
 
 if __name__ == '__main__':
-    check_subtitle('')
+    print('yes')
