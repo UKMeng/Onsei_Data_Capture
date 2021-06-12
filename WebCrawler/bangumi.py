@@ -153,4 +153,21 @@ def main(sub_id, ep_num, cookie):
     return sub_data, ep_data
 
 if __name__ == '__main__':
-    print("test")
+    cookie = ""
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3100.0 Safari/537.36"}
+    cookies = {}
+    for line in cookie.split(";"):
+        print(line)
+        if line.find("=") != -1:
+            name,value = line.strip().split("=")
+            cookies[name] = value
+    url = "https://bgm.tv/subject/311528"
+    result = requests.get(str(url), headers=headers, cookies=cookies)
+    result.encoding = "utf-8"
+    sub_doc = pq(result.text)
+    #sub_soup = BeautifulSoup(sub_htmlcode, 'lxml') 
+    sub_title = get_title(sub_doc)
+    if sub_title == '': # 判断cookie是否有效
+        print('[-]未获取到页面，请检查cookie是否有效')
+    else:
+        print(sub_title)

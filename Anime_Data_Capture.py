@@ -1,6 +1,7 @@
 import os
 from core import *
 from name_parser import name_parser
+import time
 
 def anime_lists(root, escape_folder):
     for folder in escape_folder:
@@ -42,6 +43,7 @@ def main():
         percentage = str(count / int(count_all) * 100)[:4] + '%'
         print('[!] - ' + percentage + ' [' + str(count) + '/' + count_all + '] -')
         create_data_and_move(anime_path, cookie)
+        time.sleep(5)
 
 if __name__ == '__main__':
     main()

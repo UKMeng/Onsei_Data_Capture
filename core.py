@@ -82,7 +82,7 @@ def cut_image(path, file_name, f1, f2):
         print('[-]Cover cut failed!')
 
 def check_subtitle(file_path, file_name, season_folder_path):
-    file_type = ['.srt', '.ass', '.SRT', '.ASS']
+    file_type = ['.srt', '.ass', '.SRT', '.ASS', '.ssa', '.SSA']
     base_name = os.path.splitext(os.path.basename(file_path))[0]
     root = os.path.dirname(file_path)
     dirs = os.listdir(root)
