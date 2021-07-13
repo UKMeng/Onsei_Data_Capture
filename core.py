@@ -316,7 +316,7 @@ def tags(album_folder_path, voice_data):
             a.tag.album = album_title
             a.tag.genre = tag_name
             a.tag.images.remove('')
-            a.tag.save()
+            a.tag.save(version=eyed3.id3.ID3_DEFAULT_VERSION,encoding='utf-8')      
 
 def core_voice(file_path, dlid):
     voice_data = get_voice_data_from_json(dlid)
