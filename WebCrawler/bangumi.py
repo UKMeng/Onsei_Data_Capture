@@ -4,10 +4,17 @@ import requests
 from pyquery import PyQuery as pq
 from lxml import etree
 from bs4 import BeautifulSoup
+from http.cookies import SimpleCookie
 
-def get_html(url, chii_sid):
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3100.0 Safari/537.36"}
-    cookies = dict(chii_sid=chii_sid)
+def get_html(url, rawdata):
+    #rawdata = ""
+    headers = {"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36"}
+    cookie = SimpleCookie()
+    cookie.load(rawdata)
+    cookies = {}
+    for key, morsel in cookie.items():
+        cookies[key] = morsel.value
+    #cookies = dict(chii_sid=chii_sid)
     result = requests.get(str(url), headers=headers, cookies=cookies)
     result.encoding = "utf-8"
     return result.text
@@ -153,14 +160,13 @@ def main(sub_id, ep_num, cookie):
     return sub_data, ep_data
 
 if __name__ == '__main__':
-    cookie = ""
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3100.0 Safari/537.36"}
+    rawdata = ""
+    headers = {"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36"}
+    cookie = SimpleCookie()
+    cookie.load(rawdata)
     cookies = {}
-    for line in cookie.split(";"):
-        print(line)
-        if line.find("=") != -1:
-            name,value = line.strip().split("=")
-            cookies[name] = value
+    for key, morsel in cookie.items():
+        cookies[key] = morsel.value
     url = "https://bgm.tv/subject/311528"
     result = requests.get(str(url), headers=headers, cookies=cookies)
     result.encoding = "utf-8"

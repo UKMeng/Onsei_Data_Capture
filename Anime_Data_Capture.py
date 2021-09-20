@@ -31,7 +31,8 @@ def create_data_and_move(file_path, cookie):
 
 def main():
     root_path = input("请输入目标文件夹：")
-    cookie = input("请输入bgm的cookie（chii_sid）：")
+    #cookie = input("请输入bgm的cookie（chii_sid）：")
+    cookie = input("请输入bgm的cookie：")
     os.chdir(root_path)
     anime_list = anime_lists('.', ['output'])
 
