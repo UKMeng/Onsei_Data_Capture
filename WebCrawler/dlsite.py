@@ -23,7 +23,8 @@ sys.path.append('../')
 
 def getTitle(a):
     html = etree.fromstring(a, etree.HTMLParser())
-    title = html.xpath('//*[@id="work_name"]/a/text()')[0]
+    # title = html.xpath('//*[@id="work_name"]/a/text()')[0]
+    title = html.xpath('//*[@id="work_name"]/text()')[0]
     result = re.sub('【.*?】', '', title)
     return result
 def getActor(a):  # //*[@id="center_column"]/div[2]/div[1]/div/table/tbody/tr[1]/td/text()
