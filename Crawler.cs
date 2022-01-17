@@ -1,36 +1,54 @@
-using System.Net;
 using HtmlAgilityPack;
+using System.Net;
 
 namespace Crawler
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    class DLsite
+    class OnseiCrawler
     {
-        
-        public DLsite(string url)
-        {
-            var html = getHtml(url);
-            var htmlDoc = new HtmlDocument();
-            htmlDoc.LoadHtml(html);
-            
+        private static HttpClient httpClient = new HttpClient();
+
+        public OnseiCrawler(string proxyUrl)
+        {            
+            InitializeHttpClient(proxyUrl);
         }
-        private static string getHtml(string url)
+
+        private static void InitializeHttpClient(string proxyUrl)
+        {
+            var proxy = new WebProxy(proxyUrl);
+            var cookies = new CookieContainer();
+            cookies.Add(new Cookie("locale", "ja-jp", "/", ".dlsite.com"));
+            var handler = new HttpClientHandler(){
+                Proxy = proxy,
+                UseProxy = true,
+                CookieContainer = cookies,
+                UseCookies = true
+            };
+            httpClient = new HttpClient(handler);
+            httpClient.DefaultRequestHeaders.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3100.0 Safari/537.36");
+        }
+        private static async Task<string> GetHtml(string url)
         {   
             string html = string.Empty;
             try
             {
-                var proxy = new WebProxy("127.0.0.1:8080");
-                var headers = new WebHeaderCollection();
-                headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+                //var request = WebRequest.Create(url);
+                var response = await httpClient.GetAsync(url);
+                var content = response.Content;
+                html = await content.ReadAsStringAsync();             
             }
             catch (WebException ex)
             { 
                 Console.WriteLine(ex);
             }
+
             return html;
         }
 
+        public static async Task HtmlParser(string url)
+        {
+            string html = await GetHtml(url);
+            //var parser = new HtmlParser();
+            System.IO.File.WriteAllText("./test.html", html);
+        }
     }
 }
