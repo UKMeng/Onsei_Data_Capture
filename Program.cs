@@ -11,7 +11,7 @@ namespace ODC
                 .Build();
             Settings configuration = config.GetRequiredSection("Settings").Get<Settings>();
             Crawler.InitializeHttpClient(configuration.Proxy);
-            Crawler test = new Crawler("https://www.dlsite.com/home/work/=/product_id/RJ363741.html");
+            Crawler test = new Crawler("RJ361906");
             await test.Start();
             // Console.WriteLine(test.Proxy);
             // https://www.dlsite.com/home/work/=/product_id/RJ363741.html

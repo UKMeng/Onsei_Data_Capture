@@ -5,15 +5,16 @@ namespace ODC
 {
     class Crawler
     {
-        private string _url;
+        private string url;
         public string seriesName {get; set;} = "";
-        public string[] actorNames {get; set;} = {""};
+        public List<string> actorNames {get; set;} = new List<string>();
 
         private static HttpClient httpClient = new HttpClient();
 
-        public Crawler(string url)
+        public Crawler(string number)
         {  
-            _url = url;
+            number = number.ToUpper();
+            url = "https://www.dlsite.com/pro/work/=/product_id/" + number + ".html";
             Console.WriteLine("Create Successfully");
         }
 
@@ -50,13 +51,35 @@ namespace ODC
         }
         public async Task Start()
         {
-            string html = await GetHtml(this._url);
+            string html = await GetHtml(this.url);
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(html);
+            this.actorNames = GetActorNames(htmlDoc);
             this.seriesName = GetSeriesName(htmlDoc);
+            foreach(var name in this.actorNames)
+            {
+                Console.WriteLine(name);
+            }
             Console.WriteLine(this.seriesName);
         }
 
+        private List<string> GetActorNames(HtmlDocument htmlDoc)
+        {
+            List<string> retNames = new List<string>();
+            try
+            {
+                foreach(var node in htmlDoc.DocumentNode.SelectNodes("//th[contains(text(),\"声優\")]/../td/a/text()"))
+                {
+                    //Console.WriteLine(node.InnerText);
+                    retNames.Add(node.InnerText);
+                }
+            }
+            catch
+            {
+                retNames.Add("unknown");
+            }            
+            return retNames;
+        }
         private string GetSeriesName(HtmlDocument htmlDoc)
         {
             try
