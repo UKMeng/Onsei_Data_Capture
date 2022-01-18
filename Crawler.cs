@@ -1,18 +1,23 @@
 using HtmlAgilityPack;
 using System.Net;
 
-namespace Crawler
+namespace ODC
 {
-    class OnseiCrawler
+    class Crawler
     {
+        private string _url;
+        public string seriesName {get; set;} = "";
+        public string[] actorNames {get; set;} = {""};
+
         private static HttpClient httpClient = new HttpClient();
 
-        public OnseiCrawler(string proxyUrl)
-        {            
-            InitializeHttpClient(proxyUrl);
+        public Crawler(string url)
+        {  
+            _url = url;
+            Console.WriteLine("Create Successfully");
         }
 
-        private static void InitializeHttpClient(string proxyUrl)
+        public static void InitializeHttpClient(string proxyUrl)
         {
             var proxy = new WebProxy(proxyUrl);
             var cookies = new CookieContainer();
@@ -43,12 +48,27 @@ namespace Crawler
 
             return html;
         }
-
-        public static async Task HtmlParser(string url)
+        public async Task Start()
         {
-            string html = await GetHtml(url);
-            //var parser = new HtmlParser();
-            System.IO.File.WriteAllText("./test.html", html);
+            string html = await GetHtml(this._url);
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(html);
+            this.seriesName = GetSeriesName(htmlDoc);
+            Console.WriteLine(this.seriesName);
+        }
+
+        private string GetSeriesName(HtmlDocument htmlDoc)
+        {
+            try
+            {
+                return htmlDoc.DocumentNode.SelectNodes("//th[contains(text(),\"シリーズ名\")]/../td/a/text()").First().InnerText;
+            }
+            catch
+            {
+                return "";
+            }
         }
     }
 }
+
+// System.IO.File.WriteAllText("./test.html", html);

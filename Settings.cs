@@ -1,12 +1,12 @@
 using Microsoft.Extensions.Configuration;
 
 
-namespace Config
+namespace ODC
 {
     public class Settings
-{
-    public string Proxy {get; set;} = null!;
-}
+    {
+        public string Proxy {get; set;} = null!;
+    }
 
 /*
 public class GetSettings

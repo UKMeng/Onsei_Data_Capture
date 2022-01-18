@@ -1,6 +1,4 @@
-﻿using Config;
-using Crawler;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 
 namespace ODC
 {
@@ -12,8 +10,9 @@ namespace ODC
                 .AddJsonFile("App.config")
                 .Build();
             Settings configuration = config.GetRequiredSection("Settings").Get<Settings>();
-            OnseiCrawler crawler = new OnseiCrawler(configuration.Proxy);
-            // await crawler.HtmlParser("https://www.dlsite.com/home/work/=/product_id/RJ363741.html");
+            Crawler.InitializeHttpClient(configuration.Proxy);
+            Crawler test = new Crawler("https://www.dlsite.com/home/work/=/product_id/RJ363741.html");
+            await test.Start();
             // Console.WriteLine(test.Proxy);
             // https://www.dlsite.com/home/work/=/product_id/RJ363741.html
         }
