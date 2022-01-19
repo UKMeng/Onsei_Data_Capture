@@ -1,20 +1,28 @@
 using HtmlAgilityPack;
 using System.Net;
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace ODC
 {
     class Crawler
     {
         private string url;
-        public string seriesName {get; set;} = "";
-        public List<string> actorNames {get; set;} = new List<string>();
-
+        private string id { get; set; }
+        private string title {get; set;}
+        private string seriesName {get; set;}
+        private string studioName {get; set;}
+        private List<string> actorNames {get; set;}
+        private List<string> tags {get; set;}
+        private string directorName {get; set;}
+        private string releaseDate {get; set;}
+        private string releaseYear {get; set;}
         private static HttpClient httpClient = new HttpClient();
 
         public Crawler(string number)
         {  
-            number = number.ToUpper();
-            url = "https://www.dlsite.com/pro/work/=/product_id/" + number + ".html";
+            id = number.ToUpper();
+            url = "https://www.dlsite.com/pro/work/=/product_id/" + id + ".html";
             Console.WriteLine("Create Successfully");
         }
 
@@ -54,15 +62,62 @@ namespace ODC
             string html = await GetHtml(this.url);
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(html);
+            this.title = this.id + " " + GetTitle(htmlDoc);
             this.actorNames = GetActorNames(htmlDoc);
             this.seriesName = GetSeriesName(htmlDoc);
+            this.studioName = GetStudioName(htmlDoc);
+            this.tags = GetTags(htmlDoc);
+            this.directorName = GetDirectorName(htmlDoc);
+            this.releaseDate = GetReleaseDate(htmlDoc);
+            this.releaseYear = this.releaseDate.Substring(0, 4);
+        }
+        public void Test()
+        {
+            Console.WriteLine("------------");
+            Console.WriteLine("This is information about " + this.id);
+            Console.Write("Actor: ");
             foreach(var name in this.actorNames)
             {
-                Console.WriteLine(name);
+                Console.Write(name + " ");
             }
-            Console.WriteLine(this.seriesName);
+            Console.WriteLine();
+            Console.WriteLine("Series: " + this.seriesName);
+            Console.WriteLine("Title: " + this.title);
+            Console.WriteLine("Studio: " + this.studioName);
+            Console.Write("Tags: ");
+            foreach(var tag in this.tags)
+            {
+                Console.Write(tag + " ");
+            }
+            Console.WriteLine();
+            Console.WriteLine("Writer: " + this.directorName);
+            Console.WriteLine("Release Date: " + this.releaseDate);
+            Console.WriteLine("Release Year: " + this.releaseYear);
+            Console.WriteLine("------------");
         }
-
+        private string GetTitle(HtmlDocument htmlDoc)
+        {
+            try
+            {
+                string retTitle = Regex.Replace(htmlDoc.DocumentNode.SelectNodes("//*[@id=\"work_name\"]/text()").First().InnerText, "【.*?】", "");
+                return retTitle;
+            }
+            catch
+            {
+                return "";
+            }
+        }
+        private string GetStudioName(HtmlDocument htmlDoc)
+        {
+            try
+            {
+                return htmlDoc.DocumentNode.SelectNodes("//th[contains(text(),\"サークル名\")]/../td/span[1]/a/text()").First().InnerText;
+            }
+            catch
+            {
+                return "";
+            }
+        }
         private List<string> GetActorNames(HtmlDocument htmlDoc)
         {
             List<string> retNames = new List<string>();
@@ -80,6 +135,23 @@ namespace ODC
             }            
             return retNames;
         }
+        private List<string> GetTags(HtmlDocument htmlDoc)
+        {
+            List<string> retTags = new List<string>();
+            try
+            {
+                foreach(var node in htmlDoc.DocumentNode.SelectNodes("//th[contains(text(),\"ジャンル\")]/../td/div/a/text()"))
+                {
+                    //Console.WriteLine(node.InnerText);
+                    retTags.Add(node.InnerText);
+                }
+            }
+            catch
+            {
+                Console.WriteLine("Can't find any tag of " + this.id); 
+            }
+            return retTags;
+        }
         private string GetSeriesName(HtmlDocument htmlDoc)
         {
             try
@@ -89,6 +161,57 @@ namespace ODC
             catch
             {
                 return "";
+            }
+        }
+        private string GetDirectorName(HtmlDocument htmlDoc)
+        {
+            try
+            {
+                return htmlDoc.DocumentNode.SelectNodes("//th[contains(text(),\"シナリオ\")]/../td/a/text()").First().InnerText;
+            }
+            catch
+            {
+                return "";
+            }
+        }
+        private string GetReleaseDate(HtmlDocument htmlDoc)
+        {
+            try
+            {
+                return htmlDoc.DocumentNode.SelectNodes("//th[contains(text(),\"販売日\")]/../td/a/text()").First().InnerText.Replace("年", "-").Replace("月", "-").Replace("日", "");
+            }
+            catch
+            {
+                Console.WriteLine("Can't find release Date of " + this.id);
+                return "2022-01-01";
+            }
+        }
+
+        public void OutputXml()
+        {
+            try
+            {
+                new XDocument(
+                    new XElement("album",
+                        new XElement("title", this.title),
+                        new XElement("year", this.releaseYear),
+                        new XElement("premiered", this.releaseDate),
+                        new XElement("releasedate", this.releaseDate),
+                        new XElement("studio", this.studioName),
+                        new XElement("director", this.directorName),
+                        this.actorNames.Select(name => new XElement("artist", name)),
+                        this.actorNames.Select(name => new XElement("albumartist", name)),
+                        new XElement("art", 
+                            new XElement("poster", "cover.jpg"),
+                            new XElement("fanart", "fanart.jpg")
+                        ),
+                        this.tags.Select(tag => new XElement("genre", tag))
+                    )
+                ).Save("test.xml");
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.ToString());
             }
         }
     }
