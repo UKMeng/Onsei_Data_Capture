@@ -17,6 +17,7 @@ namespace ODC
         private string directorName {get; set;}
         private string releaseDate {get; set;}
         private string releaseYear {get; set;}
+        private string outline {get; set;}
         private static HttpClient httpClient = new HttpClient();
 
         public Crawler(string number)
@@ -26,33 +27,38 @@ namespace ODC
             Console.WriteLine("Create Successfully");
         }
 
-        public static void InitializeHttpClient(string proxyUrl)
+        public static void InitializeHttpClient()
         {
-            var proxy = new WebProxy(proxyUrl);
+            var proxy = new WebProxy(Settings.Proxy);
             var cookies = new CookieContainer();
             cookies.Add(new Cookie("locale", "ja-jp", "/", ".dlsite.com"));
             var handler = new HttpClientHandler(){
                 Proxy = proxy,
-                UseProxy = true,
+                UseProxy = Settings.UseProxy,
                 CookieContainer = cookies,
                 UseCookies = true
             };
             httpClient = new HttpClient(handler);
             httpClient.DefaultRequestHeaders.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3100.0 Safari/537.36");
+            httpClient.Timeout = TimeSpan.FromSeconds(20);
         }
         private static async Task<string> GetHtml(string url)
         {   
             string html = string.Empty;
             try
             {
-                //var request = WebRequest.Create(url);
                 var response = await httpClient.GetAsync(url);
                 var content = response.Content;
                 html = await content.ReadAsStringAsync();             
             }
-            catch (WebException ex)
+            catch (TaskCanceledException e)
+            {
+                Console.WriteLine("Error: Can't not connect to dlsite.com, please check your network configuration");
+                Console.WriteLine(e.Message);
+            }
+            catch (Exception ex)
             { 
-                Console.WriteLine(ex);
+                Console.WriteLine(ex.Message);
             }
 
             return html;
@@ -70,6 +76,15 @@ namespace ODC
             this.directorName = GetDirectorName(htmlDoc);
             this.releaseDate = GetReleaseDate(htmlDoc);
             this.releaseYear = this.releaseDate.Substring(0, 4);
+            this.outline = GetOutline(htmlDoc);
+            if(studioName != "")
+            {
+                this.tags.Add("社团名：" + this.studioName);
+            }
+            if(seriesName != "")
+            {
+                this.tags.Add("系列名：" + this.seriesName);
+            }
         }
         public void Test()
         {
@@ -93,6 +108,7 @@ namespace ODC
             Console.WriteLine("Writer: " + this.directorName);
             Console.WriteLine("Release Date: " + this.releaseDate);
             Console.WriteLine("Release Year: " + this.releaseYear);
+            Console.WriteLine("Outline: " + this.outline);
             Console.WriteLine("------------");
         }
         private string GetTitle(HtmlDocument htmlDoc)
@@ -186,7 +202,18 @@ namespace ODC
                 return "2022-01-01";
             }
         }
-
+        private string GetOutline(HtmlDocument htmlDoc)
+        {
+            try
+            {
+                string outline = htmlDoc.DocumentNode.SelectNodes("//meta[@name=\"description\"]").First().Attributes["content"].Value;
+                return Regex.Replace(outline, "「DLsite 同人」は.*", "");
+            }
+            catch
+            {
+                return "";
+            }
+        }
         public void OutputXml()
         {
             try
@@ -197,6 +224,8 @@ namespace ODC
                         new XElement("year", this.releaseYear),
                         new XElement("premiered", this.releaseDate),
                         new XElement("releasedate", this.releaseDate),
+                        new XElement("outline", this.outline),
+                    //  new XElement("plot", this.outline),
                         new XElement("studio", this.studioName),
                         new XElement("director", this.directorName),
                         this.actorNames.Select(name => new XElement("artist", name)),
@@ -205,13 +234,14 @@ namespace ODC
                             new XElement("poster", "cover.jpg"),
                             new XElement("fanart", "fanart.jpg")
                         ),
-                        this.tags.Select(tag => new XElement("genre", tag))
+                        this.tags.Select(tag => new XElement("genre", tag)),
+                        new XElement("maker", this.studioName)
                     )
                 ).Save("test.xml");
             }
             catch(Exception e)
             {
-                Console.WriteLine(e.ToString());
+                Console.WriteLine(e.Message);
             }
         }
     }
