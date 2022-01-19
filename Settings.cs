@@ -28,29 +28,25 @@ namespace ODC
             {
                 string prefix = "http://";
                 string address = "127.0.0.1:8080";
-                foreach(var child in config.GetRequiredSection("proxy").GetChildren())
+                var typeSection = config.GetRequiredSection("proxy").GetRequiredSection("type");
+                if(typeSection.Key == "type")
                 {
-                    if(child.Key == "type")
+                    if(typeSection.Value == "no")
                     {
-                        if(child.Value == "no")
-                        {
-                            UseProxy = false;
-                        }
-                        else if(child.Value == "http" || child.Value == "socks5")
-                        {
-                            UseProxy = true;
-                            prefix = child.Value + "://";
-                        }
-                        else
-                        {
-                            throw new Exception("ERROR: Invalid Type of Proxy");
-                        }
+                        UseProxy = false;
+                    }
+                    else if(typeSection.Value == "http" || typeSection.Value == "socks5")
+                    {
+                        UseProxy = true;
+                        prefix = typeSection.Value + "://";
                     }
                     else
                     {
-                        address = child.Value;
+                        throw new Exception("ERROR: Invalid Type of Proxy");
                     }
                 }
+                var addressSection = config.GetRequiredSection("proxy").GetRequiredSection("proxy");
+                if(UseProxy) address = addressSection.Value;
                 Proxy = prefix + address;               
             }
             catch(Exception e)
