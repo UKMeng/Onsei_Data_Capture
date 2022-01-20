@@ -8,23 +8,28 @@ namespace ODC
     class Crawler
     {
         private string url;
+        private string workPath;
+        private string albumPath;
         private string id { get; set; }
-        private string title {get; set;}
-        private string seriesName {get; set;}
-        private string studioName {get; set;}
-        private List<string> actorNames {get; set;}
-        private List<string> tags {get; set;}
+        public string title {get; set;}
+        public string seriesName {get; set;}
+        public string studioName {get; set;}
+        public List<string> actorNames {get; set;}
+        private string actorStr = "";
+        public List<string> tags {get; set;} = new List<string>();
+        private string tagStr = "";
         private string directorName {get; set;}
         private string releaseDate {get; set;}
-        private string releaseYear {get; set;}
+        public string releaseYear {get; set;}
         private string outline {get; set;}
         private static HttpClient httpClient = new HttpClient();
 
-        public Crawler(string number)
+        public Crawler(string queryPath)
         {  
-            id = number.ToUpper();
+            workPath = queryPath;
+            id = Path.GetFileName(workPath).ToUpper();
             url = "https://www.dlsite.com/pro/work/=/product_id/" + id + ".html";
-            Console.WriteLine("Create Successfully");
+            Console.WriteLine($"Create Successfully: {this.id}");
         }
 
         public static void InitializeHttpClient()
@@ -61,29 +66,32 @@ namespace ODC
                 Console.WriteLine(ex.Message);
             }
 
-            return html;
+            return System.Web.HttpUtility.HtmlDecode(html);
         }
         public async Task Start()
         {
-            string html = await GetHtml(this.url);
-            var htmlDoc = new HtmlDocument();
-            htmlDoc.LoadHtml(html);
-            this.title = this.id + " " + GetTitle(htmlDoc);
-            this.actorNames = GetActorNames(htmlDoc);
-            this.seriesName = GetSeriesName(htmlDoc);
-            this.studioName = GetStudioName(htmlDoc);
-            this.tags = GetTags(htmlDoc);
-            this.directorName = GetDirectorName(htmlDoc);
-            this.releaseDate = GetReleaseDate(htmlDoc);
-            this.releaseYear = this.releaseDate.Substring(0, 4);
-            this.outline = GetOutline(htmlDoc);
-            if(studioName != "")
+            try
             {
-                this.tags.Add("社团名：" + this.studioName);
+                string html = await GetHtml(this.url);
+                var htmlDoc = new HtmlDocument();
+                htmlDoc.LoadHtml(html);
+                this.title = this.id + " " + GetTitle(htmlDoc);
+                this.actorNames = GetActorNames(htmlDoc);
+                this.seriesName = GetSeriesName(htmlDoc);
+                this.studioName = GetStudioName(htmlDoc);
+                GetTags(htmlDoc);
+                this.directorName = GetDirectorName(htmlDoc);
+                this.releaseDate = GetReleaseDate(htmlDoc);
+                this.releaseYear = this.releaseDate.Substring(0, 4);
+                this.outline = GetOutline(htmlDoc);               
+                GetAlbumPath();
+                FileProcessor.MoveAllFilesFromDirectory(this.workPath, this.albumPath);
+                OutputNFO();
+                FileProcessor.EditTags(this.albumPath, this);
             }
-            if(seriesName != "")
+            catch(Exception e)
             {
-                this.tags.Add("系列名：" + this.seriesName);
+                Console.WriteLine(e.Message);
             }
         }
         public void Test()
@@ -151,22 +159,39 @@ namespace ODC
             }            
             return retNames;
         }
-        private List<string> GetTags(HtmlDocument htmlDoc)
+        private void GetTags(HtmlDocument htmlDoc)
         {
-            List<string> retTags = new List<string>();
             try
             {
                 foreach(var node in htmlDoc.DocumentNode.SelectNodes("//th[contains(text(),\"ジャンル\")]/../td/div/a/text()"))
                 {
                     //Console.WriteLine(node.InnerText);
-                    retTags.Add(node.InnerText);
+                    this.tags.Add(node.InnerText);
+                }
+                if(studioName != "")
+                {
+                    this.tags.Add("社团名：" + this.studioName);
+                }
+                if(seriesName != "")
+                {
+                    this.tags.Add("系列名：" + this.seriesName);
+                }
+                foreach(string tag in this.tags)
+                {
+                    if(tagStr == "")
+                    {
+                        tagStr = tag.Trim();
+                    }
+                    else
+                    {
+                        tagStr = tagStr + ";" + tag.Trim();
+                    }
                 }
             }
             catch
             {
                 Console.WriteLine("Can't find any tag of " + this.id); 
             }
-            return retTags;
         }
         private string GetSeriesName(HtmlDocument htmlDoc)
         {
@@ -214,7 +239,42 @@ namespace ODC
                 return "";
             }
         }
-        public void OutputXml()
+        private void GetAlbumPath()
+        {
+            try
+            {
+                foreach(string name in actorNames)
+                {
+                    if(actorStr == "")
+                    {
+                        actorStr = name.Trim();
+                    }
+                    else
+                    {
+                        actorStr = actorStr + ";" + name.Trim();
+                    }
+                }
+                string actorPath = Path.Join(Settings.OutputDir, actorStr);
+                if(!Directory.Exists(actorPath))
+                {
+                    try
+                    {
+                        Directory.CreateDirectory(actorPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+                this.albumPath = Path.Join(Settings.OutputDir, this.actorStr, this.id);
+                Console.WriteLine(albumPath);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+        private void OutputNFO()
         {
             try
             {
@@ -237,7 +297,7 @@ namespace ODC
                         this.tags.Select(tag => new XElement("genre", tag)),
                         new XElement("maker", this.studioName)
                     )
-                ).Save("test.xml");
+                ).Save(Path.Join(this.albumPath, "album.nfo"));
             }
             catch(Exception e)
             {
