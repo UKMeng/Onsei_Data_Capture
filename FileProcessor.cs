@@ -98,21 +98,54 @@ namespace ODC
                 Console.WriteLine(e.Message);
             }
         }
+
         public static void EditTags(string albumPath, Crawler album)
         {
-            var file = new 
+            var extensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".mp3", ".m4a", ".flac", ".wav", ""};
         }
+
         public static void ChangeMetaData(string filePath, Crawler album)
         {
             try
             {
                 var tfile = TagLib.File.Create(filePath);
                 tfile.Tag.Clear();
-                tfile.Tag.Title = album.title;
+                tfile.Tag.Album = album.title;
                 tfile.Tag.Performers = album.actorNames.ToArray();
                 tfile.Tag.AlbumArtists = album.actorNames.ToArray();
                 tfile.Tag.Genres = album.tags.ToArray();
                 tfile.Tag.Year = UInt32.Parse(album.releaseYear);
+                tfile.Save();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
+        // Wav meta data https://www.robotplanet.dk/audio/wav_meta_data/
+        public static void WavTest(string filePath)
+        {
+            try
+            {
+                var tfile = TagLib.File.Create(filePath);
+                Console.WriteLine("Create Success");
+                tfile.Tag.Clear();
+                /*
+                Console.WriteLine(tfile.TagTypes.ToString());
+                tfile.Tag.Album = "tsds";
+                string[] names = {"a", "b"};
+                tfile.Tag.Performers = names;
+                */
+                TagLib.Riff.InfoTag test = (TagLib.Riff.InfoTag)tfile.GetTag(TagLib.TagTypes.RiffInfo, false);
+                if(test != null)
+                {
+                    test.SetValue("IART", "aaa;bbb");
+                    test.SetValue("IGNR", "ASMR;TEST;");
+                    test.SetValue("TITL", "TITL");
+                    test.SetValue("IPRD", "album title");
+                }
+                
                 tfile.Save();
             }
             catch (Exception e)
