@@ -101,10 +101,31 @@ namespace ODC
 
         public static void EditTags(string albumPath, Crawler album)
         {
-            var extensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".mp3", ".m4a", ".flac", ".wav", ""};
+            try
+            {
+                var extensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".mp3", ".m4a", ".flac", ".wav"};
+                var audioFiles = from file in Directory.EnumerateFiles(albumPath, "*")
+                                where extensions.Contains(Path.GetExtension(file))
+                                select file;
+                foreach(var file in audioFiles)
+                {
+                    Console.WriteLine(file);
+                    if(string.Equals(Path.GetExtension(file), ".wav", StringComparison.OrdinalIgnoreCase))
+                    {
+                        WavFileEditor(file, album);
+                    } else
+                    {
+                        AudioFileEditor(file, album);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
-        public static void ChangeMetaData(string filePath, Crawler album)
+        public static void AudioFileEditor(string filePath, Crawler album)
         {
             try
             {
@@ -123,29 +144,31 @@ namespace ODC
             }
         }
 
-        // Wav meta data https://www.robotplanet.dk/audio/wav_meta_data/
-        public static void WavTest(string filePath)
+        
+        /// <summary>
+        /// Edit metadata of .wav audio file
+        /// .wav audio file's metadata use RIFF INFO TAG
+        /// https://picard-docs.musicbrainz.org/en/appendices/tag_mapping.html
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="album"></param>
+        public static void WavFileEditor(string filePath, Crawler album)
         {
             try
             {
                 var tfile = TagLib.File.Create(filePath);
-                Console.WriteLine("Create Success");
                 tfile.Tag.Clear();
-                /*
-                Console.WriteLine(tfile.TagTypes.ToString());
-                tfile.Tag.Album = "tsds";
-                string[] names = {"a", "b"};
-                tfile.Tag.Performers = names;
-                */
-                TagLib.Riff.InfoTag test = (TagLib.Riff.InfoTag)tfile.GetTag(TagLib.TagTypes.RiffInfo, false);
-                if(test != null)
+                TagLib.Riff.InfoTag tags = (TagLib.Riff.InfoTag)tfile.GetTag(TagLib.TagTypes.RiffInfo, false);
+                if(tags != null)
                 {
-                    test.SetValue("IART", "aaa;bbb");
-                    test.SetValue("IGNR", "ASMR;TEST;");
-                    test.SetValue("TITL", "TITL");
-                    test.SetValue("IPRD", "album title");
+                    tags.SetValue("IART", album.actorStr);      // Aritist
+                    tags.SetValue("IGNR", album.tagStr);   // Genre
+                    tags.SetValue("IPRD", album.title);  // Album Title
                 }
-                
+                else
+                {
+                    throw new InvalidOperationException("This file do not have RiffInfo tag");
+                }
                 tfile.Save();
             }
             catch (Exception e)

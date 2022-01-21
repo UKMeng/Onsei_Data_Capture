@@ -4,8 +4,6 @@
     {
         static async Task Main(string[] args)
         {
-            FileProcessor.Test("./test/a.wav");
-            /*
             Settings.InitializeSettings();
             FileProcessor.InitializeFileProcessor();
             Crawler.InitializeHttpClient();
@@ -19,7 +17,6 @@
                 cnt++;
                 test.Test();
             }    
-            */  
             // Console.WriteLine(test.Proxy);
             // https://www.dlsite.com/home/work/=/product_id/RJ363741.html
         }

@@ -15,9 +15,9 @@ namespace ODC
         public string seriesName {get; set;}
         public string studioName {get; set;}
         public List<string> actorNames {get; set;}
-        private string actorStr = "";
+        public string actorStr = "";
         public List<string> tags {get; set;} = new List<string>();
-        private string tagStr = "";
+        public string tagStr = "";
         private string directorName {get; set;}
         private string releaseDate {get; set;}
         public string releaseYear {get; set;}
@@ -56,14 +56,14 @@ namespace ODC
                 var content = response.Content;
                 html = await content.ReadAsStringAsync();             
             }
-            catch (TaskCanceledException e)
+            catch (TaskCanceledException)
             {
-                Console.WriteLine("Error: Can't not connect to dlsite.com, please check your network configuration");
-                Console.WriteLine(e.Message);
+                throw new TaskCanceledException("Error: Can't not connect to dlsite.com, please check your network configuration");
             }
             catch (Exception ex)
             { 
                 Console.WriteLine(ex.Message);
+                throw;
             }
 
             return System.Web.HttpUtility.HtmlDecode(html);
@@ -92,6 +92,7 @@ namespace ODC
             catch(Exception e)
             {
                 Console.WriteLine(e.Message);
+                throw;
             }
         }
         public void Test()
