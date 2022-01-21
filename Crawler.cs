@@ -259,7 +259,7 @@ namespace ODC
             try
             {
                 Log.Debug("------------");
-                Log.Debug("This is Debug about " + this.id);
+                Log.Debug("This is information about " + this.id);
                 Log.Debug("Actor: " + this.actorStr);
                 Log.Debug("Series: " + this.seriesName);
                 Log.Debug("Title: " + this.title);

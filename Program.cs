@@ -13,10 +13,11 @@ namespace ODC
                 FileProcessor.InitializeFileProcessor();
                 Crawler.InitializeHttpClient();
                 Log.Information($"The number of queries: {FileProcessor.Queries.Count}");
-                int cnt = 0;
+                int cnt = 1;
                 foreach(var query in FileProcessor.Queries)
                 {
-                    Log.Information($"Process: {cnt} / {FileProcessor.Queries.Count}");
+                    Log.Information($"Progress: {cnt} / {FileProcessor.Queries.Count}");
+                    Log.Information($"Processing: {Path.GetFileName(query)}");
                     Crawler test = new Crawler(query);
                     await test.Start();
                     cnt++;
