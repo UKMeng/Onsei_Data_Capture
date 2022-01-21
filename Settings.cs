@@ -31,11 +31,18 @@ namespace ODC
         }
         private static void InitLog()
         {
-            Logger = new LoggerConfiguration()
+            try
+            {
+                Logger = new LoggerConfiguration()
                     .MinimumLevel.Debug()
                     .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information)
-                    .WriteTo.File($"log/log-{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt")
+                    .WriteTo.File($"log/log-{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt", outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
                     .CreateLogger();
+            }
+            catch (System.Exception)
+            {
+                throw new Exception("ERROR: Failed to initialize the logger");
+            }          
         }
         private static void InitCommon()
         {
@@ -49,9 +56,9 @@ namespace ODC
                 //Console.WriteLine(OutputDir);
                 //Console.WriteLine(FailedDir);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Console.WriteLine(e.Message);
+                throw new FileLoadException("ERROR: Can't set the common configuration");
             }           
         }
         private static void InitProxy()
@@ -79,9 +86,8 @@ namespace ODC
                 if(UseProxy) address = addressSection.Value;
                 Proxy = prefix + address;               
             }
-            catch(Exception e)
+            catch(Exception)
             {
-                Console.WriteLine(e.Message);
                 throw;
             }
         }      

@@ -63,9 +63,8 @@ namespace ODC
             {
                 throw new TaskCanceledException("Error: Can't not connect to dlsite.com, please check your network configuration");
             }
-            catch (Exception ex)
-            { 
-                Console.WriteLine(ex.Message);
+            catch (Exception)
+            {
                 throw;
             }
 
@@ -93,9 +92,8 @@ namespace ODC
                 FileProcessor.EditTags(this.albumPath, this);
                 Log.Debug("Finish: " + this.id);
             }
-            catch(Exception e)
+            catch(Exception)
             {
-                Console.WriteLine(e.Message);
                 throw;
             }
         }
@@ -170,7 +168,7 @@ namespace ODC
             }
             catch
             {
-                Console.WriteLine("Can't find any tag of " + this.id); 
+                Log.Information("Can't find any tag of " + this.id); 
             }
         }
         private string GetSeriesName(HtmlDocument htmlDoc)
@@ -203,7 +201,7 @@ namespace ODC
             }
             catch
             {
-                Console.WriteLine("Can't find release Date of " + this.id);
+                Log.Information("Can't find release Date of " + this.id);
                 return "2022-01-01";
             }
         }
@@ -241,17 +239,17 @@ namespace ODC
                     {
                         Directory.CreateDirectory(actorPath);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
-                        Console.WriteLine(ex.Message);
+                        throw;
                     }
                 }
                 this.albumPath = Path.Join(Settings.OutputDir, this.actorStr, this.id);
                 Log.Debug("Album Path: " + albumPath);
             }
-            catch(Exception ex)
+            catch(Exception)
             {
-                Console.WriteLine(ex.Message);
+                throw;
             }
         }
         private void OutputNFO()
@@ -259,7 +257,7 @@ namespace ODC
             try
             {
                 Log.Debug("------------");
-                Log.Debug("This is Debug about " + this.id);
+                Log.Debug("This is information about " + this.id);
                 Log.Debug("Actor: " + this.actorStr);
                 Log.Debug("Series: " + this.seriesName);
                 Log.Debug("Title: " + this.title);
@@ -291,9 +289,9 @@ namespace ODC
                     )
                 ).Save(Path.Join(this.albumPath, "album.nfo"));
             }
-            catch(Exception e)
+            catch(Exception)
             {
-                Console.WriteLine(e.Message);
+                throw;
             }
         }
     }
