@@ -1,3 +1,4 @@
+using Serilog;
 using TagLib;
 
 namespace ODC
@@ -9,6 +10,7 @@ namespace ODC
         {
             try
             {
+                Log.Logger = Settings.Logger;
                 IsVaildWorkingDir();
                 CreateOutputDir();
                 AddQueries();
@@ -42,7 +44,7 @@ namespace ODC
                         select dir;
                 foreach(var dir in dirs)
                 {
-                    Console.WriteLine(dir);
+                    //Console.WriteLine(dir);
                     Queries.Add(dir);
                     //Console.WriteLine(Path.GetFileName(dir));
                 }
@@ -70,7 +72,7 @@ namespace ODC
         {
             try
             {
-                Console.WriteLine("Start Moving");
+                Log.Debug("Start Moving");
                 if(!Directory.Exists(destDir))
                 {
                     Directory.Move(sourceDir, destDir);
@@ -109,7 +111,7 @@ namespace ODC
                                 select file;
                 foreach(var file in audioFiles)
                 {
-                    Console.WriteLine(file);
+                    Log.Debug(file);
                     if(string.Equals(Path.GetExtension(file), ".wav", StringComparison.OrdinalIgnoreCase))
                     {
                         WavFileEditor(file, album);

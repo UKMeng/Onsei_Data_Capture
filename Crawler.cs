@@ -1,4 +1,5 @@
 using HtmlAgilityPack;
+using Serilog;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
@@ -29,11 +30,12 @@ namespace ODC
             workPath = queryPath;
             id = Path.GetFileName(workPath).ToUpper();
             url = "https://www.dlsite.com/pro/work/=/product_id/" + id + ".html";
-            Console.WriteLine($"Create Successfully: {this.id}");
+            Log.Debug($"Create Successfully: {this.id}");
         }
 
         public static void InitializeHttpClient()
         {
+            Log.Logger = Settings.Logger;
             var proxy = new WebProxy(Settings.Proxy);
             var cookies = new CookieContainer();
             cookies.Add(new Cookie("locale", "ja-jp", "/", ".dlsite.com"));
@@ -49,6 +51,7 @@ namespace ODC
         }
         private static async Task<string> GetHtml(string url)
         {   
+            Log.Debug("Test in Crawler");
             string html = string.Empty;
             try
             {
@@ -88,37 +91,13 @@ namespace ODC
                 FileProcessor.MoveAllFilesFromDirectory(this.workPath, this.albumPath);
                 OutputNFO();
                 FileProcessor.EditTags(this.albumPath, this);
+                Log.Debug("Finish: " + this.id);
             }
             catch(Exception e)
             {
                 Console.WriteLine(e.Message);
                 throw;
             }
-        }
-        public void Test()
-        {
-            Console.WriteLine("------------");
-            Console.WriteLine("This is information about " + this.id);
-            Console.Write("Actor: ");
-            foreach(var name in this.actorNames)
-            {
-                Console.Write(name + " ");
-            }
-            Console.WriteLine();
-            Console.WriteLine("Series: " + this.seriesName);
-            Console.WriteLine("Title: " + this.title);
-            Console.WriteLine("Studio: " + this.studioName);
-            Console.Write("Tags: ");
-            foreach(var tag in this.tags)
-            {
-                Console.Write(tag + " ");
-            }
-            Console.WriteLine();
-            Console.WriteLine("Writer: " + this.directorName);
-            Console.WriteLine("Release Date: " + this.releaseDate);
-            Console.WriteLine("Release Year: " + this.releaseYear);
-            Console.WriteLine("Outline: " + this.outline);
-            Console.WriteLine("------------");
         }
         private string GetTitle(HtmlDocument htmlDoc)
         {
@@ -268,7 +247,7 @@ namespace ODC
                     }
                 }
                 this.albumPath = Path.Join(Settings.OutputDir, this.actorStr, this.id);
-                Console.WriteLine(albumPath);
+                Log.Debug("Album Path: " + albumPath);
             }
             catch(Exception ex)
             {
@@ -279,6 +258,18 @@ namespace ODC
         {
             try
             {
+                Log.Debug("------------");
+                Log.Debug("This is Debug about " + this.id);
+                Log.Debug("Actor: " + this.actorStr);
+                Log.Debug("Series: " + this.seriesName);
+                Log.Debug("Title: " + this.title);
+                Log.Debug("Studio: " + this.studioName);
+                Log.Debug("Genre: " + this.tagStr);
+                Log.Debug("Writer: " + this.directorName);
+                Log.Debug("Release Date: " + this.releaseDate);
+                Log.Debug("Release Year: " + this.releaseYear);
+                Log.Debug("Outline: " + this.outline);
+                Log.Debug("------------");
                 new XDocument(
                     new XElement("album",
                         new XElement("title", this.title),
