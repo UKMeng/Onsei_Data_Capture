@@ -15,23 +15,16 @@ namespace ODC
                 CreateOutputDir();
                 AddQueries();
             }
-            catch (UnauthorizedAccessException ex)
+            catch (Exception)
             {
-                Console.WriteLine(ex.Message);
-            }
-            catch (PathTooLongException ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
+                throw;
             }
         }
         private static void IsVaildWorkingDir()
         {
+            Log.Information("SourceDir: " + Settings.WorkingDir);
             if(!Directory.Exists(Settings.WorkingDir))
-            {
+            {                
                 throw new DirectoryNotFoundException("Error: Can't find the Source Folder, Please check your configuration.");
             }
         }
