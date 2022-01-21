@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
-
+using Serilog;
+using Serilog.Events;
 
 namespace ODC
 {
@@ -11,6 +12,7 @@ namespace ODC
         public static string Proxy {get; set;}
         public static bool UseProxy {get; set;} = false;
         private static IConfiguration config;
+        public static Serilog.Core.Logger Logger;
         public static void InitializeSettings()
         {
             try
@@ -19,12 +21,21 @@ namespace ODC
                 .AddIniFile("Config.ini")
                 .Build();
                 InitCommon();
+                InitLog();
                 InitProxy();
             }
-            catch (Exception e)
+            catch (Exception)
             {                
-                Console.WriteLine(e.Message);
+                throw;
             }
+        }
+        private static void InitLog()
+        {
+            Logger = new LoggerConfiguration()
+                    .MinimumLevel.Debug()
+                    .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information)
+                    .WriteTo.File($"log/log-{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt")
+                    .CreateLogger();
         }
         private static void InitCommon()
         {
@@ -71,6 +82,7 @@ namespace ODC
             catch(Exception e)
             {
                 Console.WriteLine(e.Message);
+                throw;
             }
         }      
     }
