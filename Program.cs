@@ -8,6 +8,8 @@ namespace ODC
         {
             try
             {
+                Console.WriteLine("\npress any key to start...");
+                Console.ReadKey();
                 Settings.InitializeSettings();
                 Log.Logger = Settings.Logger;             
                 FileProcessor.InitializeFileProcessor();
@@ -21,7 +23,9 @@ namespace ODC
                     Crawler test = new Crawler(query);
                     await test.Start();
                     cnt++;
-                }    
+                }  
+                Console.WriteLine("\npress any key to end...");
+                Console.ReadKey();              
             }
             catch (Exception e)
             {

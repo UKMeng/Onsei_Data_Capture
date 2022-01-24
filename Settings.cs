@@ -36,7 +36,7 @@ namespace ODC
                 Logger = new LoggerConfiguration()
                     .MinimumLevel.Debug()
                     .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information)
-                    .WriteTo.File($"log/log-{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt", outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+                    .WriteTo.File(Path.Join(System.AppContext.BaseDirectory, $"log/log-{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt"), outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
                     .CreateLogger();
             }
             catch (System.Exception)
